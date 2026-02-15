@@ -1,7 +1,10 @@
 ﻿using IntegrationHub.Api.DTOs.FinTech;
 using IntegrationHub.Application.FinTech.DTOs;
+using IntegrationHub.Application.FinTech.InboundPorts;
+using IntegrationHub.Application.FinTech.OutboundPorts;
+//using Stripe;
+//using AccountService = IntegrationHub.Application.FinTech.Services.AccountService;
 using IntegrationHub.Application.FinTech.Services;
-using Microsoft.AspNetCore.Builder;
 
 namespace IntegrationHub.Api.Endpoints
 {
@@ -27,11 +30,11 @@ namespace IntegrationHub.Api.Endpoints
                     return Results.Ok(response);
             });
 
-            app.MapPost("fintech/accounts", (CreateAccountRequest request, AccountService service) =>
+            app.MapPost("fintech/accounts", async (CreateAccountRequest request, AccountService service) =>
             {
                 var command = new CreateAccountCommand(request.OwnerName, request.Email ?? String.Empty, request.Currency, request.InitialAmount);
 
-                var result = service.CreateAccount(command);
+                var result = await service.CreateAccount(command);
 
                 var response = new CreateAccountResponse
                 {
@@ -42,11 +45,11 @@ namespace IntegrationHub.Api.Endpoints
                 return Results.Ok(response);
             });
 
-            app.MapPost("fintech/deposits", (DepositFundsRequest request, AccountService service) =>
+            app.MapPost("fintech/deposits", async (DepositFundsRequest request, AccountService service) =>
             {
                 var command = new DepositFundsCommand(request.AccountId, request.Amount);
 
-                var result = service.DepositFunds(command);
+                var result = await service.DepositFunds(command);
 
                 var response = new DepositFundsResponse
                 {
@@ -56,17 +59,66 @@ namespace IntegrationHub.Api.Endpoints
                 return Results.Ok(response);
             });
 
-            app.MapPost("fintech/withdraws", (WithdrawFundsRequest request, AccountService service) =>
+            app.MapPost("fintech/withdraws", async (WithdrawFundsRequest request, AccountService service) =>
             {
                 var command = new WithdrawFundsCommand(request.AccountId, request.Amount, request.Description ?? String.Empty);
 
-                var result = service.WithdrawFunds(command);
+                var result = await service.WithdrawFunds(command);
                 var response = new WithdrawFundsResponse
                 {
                     AccountId = result.AccountId,
                     NewBalance = result.Balance
                 };
+                return Results.Ok(response);
+            });
 
+            app.MapPost("fintech/payments", async (PaymentRequest request, PaymentService service) =>
+            {
+                var command = new ProcessPaymentCommand(request.AccountId, request.Amount, request.Description ?? String.Empty, request.Currency, request.PaymentMethod, request.MerchantId ?? String.Empty);
+
+                var result = await service.ProcessPayment(command);
+                // TODO: Validate error result
+
+                return Results.Ok(new PaymentResponse
+                {
+                    PaymentId = result.paymentId,
+                    ExternalTransactionId = result.externalTransactionId,
+                    Success = result.success,
+                    Message = result.message,
+                    CheckOutUrl = result.checkOutUr
+                }); 
+            });
+
+            app.MapGet("fintech/payments/success", async (string session_id, IPaymentQueryService queryservice) =>
+            {
+                var paymentDetails = await queryservice.GetPaymentBySessionIdAsync(session_id);
+                return Results.Ok(paymentDetails);
+            });
+
+            app.MapGet("fintech/payments/cancel", async (string session_id, IPaymentQueryService queryservice) =>
+            {
+                var paymentDetails = await queryservice.GetPaymentBySessionIdAsync(session_id);
+                return Results.Ok(new
+                {
+                    paymentDetails.SessionId,
+                    Status = "cancelled",
+                    paymentDetails.Currency,
+                    AmountTotal = paymentDetails.Amount
+                });
+            });
+
+            app.MapPost("fintech/payments/webhook", async (HttpRequest request, PaymentService service) =>
+            {
+                using var reader = new StreamReader(request.Body);
+
+
+                var json = await reader.ReadToEndAsync();
+                var signature = request.Headers["Stripe-Signature"];
+                if (string.IsNullOrWhiteSpace(signature))
+                    return Results.BadRequest(new { error = "signature missing"});
+
+                await service.ProcessWebhook(json, signature!);
+                return Results.Ok();
             });
         }
     }

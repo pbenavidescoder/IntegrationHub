@@ -23,7 +23,7 @@ namespace IntegrationHub.Application.FinTech.Services
 
         public IEnumerable<GetAccountResult> ListAccounts()
         {
-            var accounts =_accountRepository.GetAll();
+            var accounts =  _accountRepository.GetAll();
             return accounts.Select(a => new GetAccountResult(
                 a.AccountId,
                 a.OwnerName,
@@ -32,10 +32,10 @@ namespace IntegrationHub.Application.FinTech.Services
                 a.Currency));
         }
 
-        public CreateAccountResult CreateAccount(CreateAccountCommand command)
+        public async Task<CreateAccountResult> CreateAccount(CreateAccountCommand command)
         {
             var account = new Account(command.AccountOwner, command.Email, command.Currency, command.Balance);
-            _accountRepository.Save(account);
+            await _accountRepository.SaveAsync(account);
 
             foreach (var domainEvent in account.DomainEvents)
             {
@@ -47,9 +47,9 @@ namespace IntegrationHub.Application.FinTech.Services
             return new CreateAccountResult(account.AccountId, account.OwnerName, account.Balance);
         }
 
-        public DepositFundsResult DepositFunds(DepositFundsCommand command)
+        public async Task<DepositFundsResult> DepositFunds(DepositFundsCommand command)
         {
-            var account = _accountRepository.GetById(command.AccountId);
+            var account = await _accountRepository.GetByIdAsync(command.AccountId);
             account.Deposit(command.Amount);
 
             foreach (var domainEvent in account.DomainEvents)
@@ -59,14 +59,14 @@ namespace IntegrationHub.Application.FinTech.Services
 
             account.ClearDomainEvents();
 
-            _accountRepository.Save(account);
+            await _accountRepository.SaveAsync(account);
 
             return new DepositFundsResult(account.AccountId, account.Balance);
         }
 
-        public WithdrawFundsResult WithdrawFunds(WithdrawFundsCommand command)
+        public async Task<WithdrawFundsResult> WithdrawFunds(WithdrawFundsCommand command)
         {
-            var account = _accountRepository.GetById(command.AccountId);
+            var account = await _accountRepository.GetByIdAsync(command.AccountId);
             account.Withdraw(command.Amount, command.Reason);
 
             foreach (var domainEvent in account.DomainEvents)
@@ -75,7 +75,7 @@ namespace IntegrationHub.Application.FinTech.Services
             }
 
             account.ClearDomainEvents();
-            _accountRepository.Save(account);
+            await _accountRepository.SaveAsync(account);
 
             return new WithdrawFundsResult(account.AccountId, account.Balance);
         }

@@ -6,6 +6,7 @@ using System.Text;
 using System.Threading.Tasks;
 
 using System;
+using System.Transactions;
 
 namespace IntegrationHub.Domain.FinTech.Entities
 {
@@ -36,9 +37,29 @@ namespace IntegrationHub.Domain.FinTech.Entities
         public decimal Amount { get; private set; }
 
         /// <summary>
+        /// Gets the currency for the payment.
+        /// </summary>
+        public string Currency { get; private set; }
+
+        /// <summary>
         /// Gets the date and time when the payment was created.
         /// </summary>
         public DateTime PaymentDate { get; private set; }
+
+        /// <summary>
+        /// Gets the payment method used for the transaction, if applicable.
+        /// </summary>
+        public string? PaymentMethod { get; private set; }
+
+        /// <summary>
+        /// Gets the product or service description of the payment or purchase
+        /// </summary>
+        public string? ProductDescription { get; private set; }
+        
+        /// <summary>
+        /// Gets the External transaction identification from external provider 
+        /// </summary>
+        public string? ExternalTransactionId { get; private set; }
 
         /// <summary>
         /// Gets the current status of the payment.
@@ -56,27 +77,41 @@ namespace IntegrationHub.Domain.FinTech.Entities
         public string? Merchant { get; private set; }
 
         /// <summary>
-        /// Gets the payment method used for the transaction, if applicable.
+        /// Gets an external reference id associated with the payment, if applicable.
         /// </summary>
-        public string? PaymentMethod { get; private set; }
+        public string? ExternalId { get; private set; }
+
 
         /// <summary>
         /// Initializes a new instance of the <see cref="Payment"/> class.
-        /// </summary>
-        /// <param name="accountGuid">The identifier of the account associated with the payment.</param>
-        /// <param name="amount">The monetary amount of the payment.</param>
+        /// <param name="accountGuid">Unique identifier of the account associated with the payment.</param> 
+        /// <param name="amount">Monetary amount of the payment.</param> 
+        /// <param name="currency">Currency in which the payment is made.</param> 
+        /// <param name="paymentMethod">Method used for the payment (e.g., Cash or Card).</param> 
+        /// <param name="productDescription">Description of the product or service being paid.</param> 
+        /// <param name="merchant">Merchant receiving the payment.</param>
         /// <remarks>
         /// The payment is initialized with a new <see cref="PaymentId"/>, the current UTC date/time, 
-        /// a status of <see cref="PaymentStatus.Pending"/>, and an empty failure reason.
+        /// a status of <see cref="PaymentStatus.Pending"/>, and an empty failure reason. 
         /// </remarks>
-        private Payment(Guid accountGuid, decimal amount)
+        private Payment(Guid accountGuid, decimal amount, string currency, string paymentMethod,
+            string productDescription, string merchant)
         {
             PaymentId = Guid.NewGuid();
             AccountId = accountGuid;
             Amount = amount;
+            Currency = currency;
             PaymentDate = DateTime.UtcNow;
+            PaymentMethod = paymentMethod;
+            ProductDescription = productDescription;
+            Merchant = merchant;
             Status = PaymentStatus.Pending;
             FailureReason = string.Empty;
+        }
+
+       internal void AttachExternalId(string externalId)
+        {
+            ExternalId = externalId;
         }
 
         /// <summary>
@@ -85,9 +120,9 @@ namespace IntegrationHub.Domain.FinTech.Entities
         /// <param name="accountGuid">The unique identifier of the account associated with the payment.</param>
         /// <param name="amount">The payment amount. Must be a positive value.</param>
         /// <returns>A new <see cref="Payment"/> instance initialized with the specified account identifier and amount.</returns>
-        internal static Payment Create(Guid accountGuid, decimal amount)
+        internal static Payment CreatePayment(Guid accountGuid, decimal amount, string currency, string paymentMethod, string productDescription, string merchant)
         {
-            return new Payment(accountGuid, amount);
+            return new Payment(accountGuid, amount, currency, paymentMethod, productDescription, merchant);
         }
 
         /// <summary>

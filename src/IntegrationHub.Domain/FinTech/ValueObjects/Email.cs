@@ -60,7 +60,6 @@ namespace IntegrationHub.Domain.FinTech.ValueObjects
         /// </summary>
         /// <param name="email">The <see cref="Email"/> instance to convert.</param>
         /// <returns>The underlying email address string.</returns>
-
         public static implicit operator string(Email email) => email.Address;
 
         /// <summary>

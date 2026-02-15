@@ -11,7 +11,7 @@ namespace IntegrationHub.Infrastructure.FinTech.Email
     {
         public Task SendAsync(string to, string body)
         {
-            Console.WriteLine($"Simulatind email sent to {to}: {body}");
+            Console.WriteLine($"Simulating email sent to {to}: {body}");
             return Task.CompletedTask;
         }
     }

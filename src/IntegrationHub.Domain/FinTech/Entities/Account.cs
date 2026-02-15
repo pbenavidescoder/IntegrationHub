@@ -131,10 +131,14 @@ namespace IntegrationHub.Domain.FinTech.Entities
             _domainEvents.Add(new FundsWithdrawn(AccountId, amount, reason));
         }
 
-        public Payment MakePayment(decimal amount, string reason)
+        public Payment MakePayment(decimal amount, string reason, string currency, string method, string merchant)
         {
-            Withdraw(amount, reason);
-            var payment = Payment.Create(AccountId, amount);
+            
+            if (amount <= 0) throw new ArgumentException("Amount must be greater than zero"); //TODO add specific exception.
+            if (string.IsNullOrWhiteSpace(currency)) throw new ArgumentException("Currency is required");
+            if (string.IsNullOrWhiteSpace(method)) throw new ArgumentException("Payment method is required");
+
+            var payment = Payment.CreatePayment(AccountId, amount, currency, method, reason, merchant);
             _payments.Add(payment);
 
             _domainEvents.Add(new PaymentCreated(payment.PaymentId, payment.AccountId, payment.Amount));
@@ -142,9 +146,24 @@ namespace IntegrationHub.Domain.FinTech.Entities
             return payment;
         }
 
-        public void CompletePayment(Payment payment)
+        public void AttachPaymentExternalId(string paymentId, string externalId)
         {
+            var payment = _payments.FirstOrDefault(p => p.PaymentId.ToString() == paymentId);
+            if (payment == null) throw new InvalidOperationException("Payment not found");
+
+            payment.AttachExternalId(externalId);
+
+        }
+
+        public void CompletePayment(string externalId)
+        {
+            var payment = _payments.FirstOrDefault(p => p.ExternalId == externalId);
+            if (payment == null)
+                throw new InvalidOperationException("Payment not found");
+            
+            Withdraw(payment.Amount, payment.ProductDescription);
             payment.Complete();
+
             _domainEvents.Add(new PaymentCompleted(payment.PaymentId, payment.AccountId, payment.Amount));
 
         }

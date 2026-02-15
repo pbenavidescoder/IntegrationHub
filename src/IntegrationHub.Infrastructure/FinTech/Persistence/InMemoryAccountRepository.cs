@@ -12,18 +12,19 @@ namespace IntegrationHub.Infrastructure.FinTech.Persistence
     public class InMemoryAccountRepository : IAccountRepository
     {
         private readonly Dictionary<Guid, Account> _accounts = new();
-        public Account GetById(Guid accountId)
+        public Task<Account> GetByIdAsync(Guid accountId)
         {
             if (_accounts.TryGetValue(accountId, out var account))
-                return account;
+                return Task.FromResult(account);
             throw new AccountNotFoundException(accountId);
         }
         public IEnumerable<Account> GetAll() => _accounts.Values;
       
 
-        public void Save(Account account)
+        public Task SaveAsync(Account account)
         {
             _accounts[account.AccountId]= account;
+            return Task.CompletedTask;
         }
     }
 }
