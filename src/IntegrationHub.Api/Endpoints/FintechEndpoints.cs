@@ -28,7 +28,8 @@ namespace IntegrationHub.Api.Endpoints
                     });
            
                     return Results.Ok(response);
-            });
+            })
+                .WithTags("Fintech Hub");
 
             app.MapPost("fintech/accounts", async (CreateAccountRequest request, AccountService service) =>
             {
@@ -43,7 +44,8 @@ namespace IntegrationHub.Api.Endpoints
                     OwnerName = result.Owner
                 };
                 return Results.Ok(response);
-            });
+            })
+                .WithTags("Fintech Hub");
 
             app.MapPost("fintech/deposits", async (DepositFundsRequest request, AccountService service) =>
             {
@@ -57,7 +59,8 @@ namespace IntegrationHub.Api.Endpoints
                     NewBalance = result.NewBalance
                 };
                 return Results.Ok(response);
-            });
+            })
+                .WithTags("Fintech Hub");
 
             app.MapPost("fintech/withdraws", async (WithdrawFundsRequest request, AccountService service) =>
             {
@@ -70,7 +73,8 @@ namespace IntegrationHub.Api.Endpoints
                     NewBalance = result.Balance
                 };
                 return Results.Ok(response);
-            });
+            })
+                .WithTags("Fintech Hub");
 
             app.MapPost("fintech/payments", async (PaymentRequest request, PaymentService service) =>
             {
@@ -87,13 +91,15 @@ namespace IntegrationHub.Api.Endpoints
                     Message = result.message,
                     CheckOutUrl = result.checkOutUr
                 }); 
-            });
+            })
+                .WithTags("Fintech Hub"); 
 
             app.MapGet("fintech/payments/success", async (string session_id, IPaymentQueryService queryservice) =>
             {
                 var paymentDetails = await queryservice.GetPaymentBySessionIdAsync(session_id);
                 return Results.Ok(paymentDetails);
-            });
+            })
+                .WithTags("Fintech Hub");
 
             app.MapGet("fintech/payments/cancel", async (string session_id, IPaymentQueryService queryservice) =>
             {
@@ -105,7 +111,8 @@ namespace IntegrationHub.Api.Endpoints
                     paymentDetails.Currency,
                     AmountTotal = paymentDetails.Amount
                 });
-            });
+            })
+                .WithTags("Fintech Hub");
 
             app.MapPost("fintech/payments/webhook", async (HttpRequest request, PaymentService service) =>
             {
@@ -119,7 +126,8 @@ namespace IntegrationHub.Api.Endpoints
 
                 await service.ProcessWebhook(json, signature!);
                 return Results.Ok();
-            });
+            })
+                .WithTags("Fintech Hub");
         }
     }
 }

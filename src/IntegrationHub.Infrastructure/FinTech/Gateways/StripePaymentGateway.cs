@@ -25,7 +25,7 @@ namespace IntegrationHub.Infrastructure.FinTech.Gateways
                 var unitAmount = Convert.ToInt32(payment.Amount * 100);
                 var options = new SessionCreateOptions
                 {
-                    PaymentMethodTypes = new List<string> { "Card", "ach_debit" },
+                    PaymentMethodTypes = new List<string> { "card", "amazon_pay" },
                     Mode = "payment",
                     LineItems = new List<SessionLineItemOptions>
                 {
@@ -59,7 +59,7 @@ namespace IntegrationHub.Infrastructure.FinTech.Gateways
                 return new PaymentGatewayResult(
                     paymentId: payment.PaymentId,
                     success: true,
-                    externalTransactionId: session.Id,
+                    externalTransactionId: session.PaymentIntentId,
                     errorMessage: string.Empty,
                     status: PaymentStatus.Pending,
                     checkoutUrl: session.Url

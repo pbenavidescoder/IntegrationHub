@@ -55,11 +55,6 @@ namespace IntegrationHub.Domain.FinTech.Entities
         /// Gets the product or service description of the payment or purchase
         /// </summary>
         public string? ProductDescription { get; private set; }
-        
-        /// <summary>
-        /// Gets the External transaction identification from external provider 
-        /// </summary>
-        public string? ExternalTransactionId { get; private set; }
 
         /// <summary>
         /// Gets the current status of the payment.
@@ -77,7 +72,7 @@ namespace IntegrationHub.Domain.FinTech.Entities
         public string? Merchant { get; private set; }
 
         /// <summary>
-        /// Gets an external reference id associated with the payment, if applicable.
+        /// Gets the External transaction identification from external provider 
         /// </summary>
         public string? ExternalId { get; private set; }
 
