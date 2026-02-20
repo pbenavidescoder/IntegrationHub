@@ -2,7 +2,7 @@
 
 namespace IntegrationHub.Application.FinTech.DTOs
 {
-    public record WebhookResult(string AccountId, string PaymentIntentId, PaymentStatus Status)
+    public record WebhookResult(string AccountId, string PaymentId, PaymentStatus Status)
     {
     }
 }

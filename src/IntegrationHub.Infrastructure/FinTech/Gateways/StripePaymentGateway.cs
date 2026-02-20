@@ -30,7 +30,7 @@ namespace IntegrationHub.Infrastructure.FinTech.Gateways
                     LineItems = new List<SessionLineItemOptions>
                 {
                     new SessionLineItemOptions
-                    {// TODO: Como me autentico con stripe?
+                    {
                         PriceData = new SessionLineItemPriceDataOptions
                         {
                             Currency = payment.Currency,
@@ -59,7 +59,7 @@ namespace IntegrationHub.Infrastructure.FinTech.Gateways
                 return new PaymentGatewayResult(
                     paymentId: payment.PaymentId,
                     success: true,
-                    externalTransactionId: session.PaymentIntentId,
+                    externalTransactionId: session.Id,
                     errorMessage: string.Empty,
                     status: PaymentStatus.Pending,
                     checkoutUrl: session.Url

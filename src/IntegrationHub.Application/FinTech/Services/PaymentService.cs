@@ -60,7 +60,7 @@ namespace IntegrationHub.Application.FinTech.Services
             {
                 Guid.TryParse(result.AccountId, out Guid id);
                 var account = await _accountRepository.GetByIdAsync(id);
-                account.CompletePayment(result.PaymentIntentId);
+                account.CompletePayment(result.PaymentId);
 
                 await _accountRepository.SaveAsync(account);
             }

@@ -27,11 +27,11 @@ namespace IntegrationHub.Infrastructure.FinTech.Gateways
                     throw new InvalidDataException("Stripe session missing"); // TODO: add Stripe exeptions
                 
                 var intentService = new PaymentIntentService();
-                var intent = await intentService.GetAsync(session.id);
+                var intent = await intentService.GetAsync(session.PaymentIntentId);
 
                 var status = StripePaymentIntentMapper.MapStatus(intent.Status);
 
-                return new WebhookResult(session.Metadata.GetValueOrDefault("accountId") ?? "123", session.PaymentIntentId, status);
+                return new WebhookResult(session.Metadata.GetValueOrDefault("accountId") ?? "123", session.Id, status);
             }
             
             return null;

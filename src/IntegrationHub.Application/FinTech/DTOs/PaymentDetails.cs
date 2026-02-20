@@ -13,6 +13,7 @@ namespace IntegrationHub.Application.FinTech.DTOs
         public decimal? Amount { get; init; }
         public required string Currency { get; init; }
         public required string Status { get; init; }
+        public required string PaymentIntent { get; set; }
 
     }
 }

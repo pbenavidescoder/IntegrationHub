@@ -28,7 +28,8 @@ namespace IntegrationHub.Infrastructure.FinTech.Gateways
                 SessionId = session.Id,
                 Amount = session.AmountTotal / 100.0m,
                 Currency = session.Currency,
-                Status = session.PaymentStatus
+                Status = session.PaymentStatus,
+                PaymentIntent = session.PaymentIntentId
             };
         }
     }
